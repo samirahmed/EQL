@@ -72,6 +72,13 @@ that contain statical analysis sent from jamie kent
 which mention  dogfood criteria sent from daniel
 which have mechanical engineering sent from me
 
+# with conjunctions
+that discuss statistics or stats sent by me
+that include business reports or biz reports sent by steven magnuson to me
+that contain statical analysis and ASAP sent from jamie kent
+which mention  dogfood criteria or stats sent from daniel
+which have mechanical engineering or electrical engineering sent from me
+
 ###################################
 ###  ATTACHMENT SPECIFIERS PHRASES
 ###################################
