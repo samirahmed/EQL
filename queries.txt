@@ -85,6 +85,31 @@ containing .xlsx attachments
 containing powerpoint attachments
 including word attachments
 
+#################################
+## LINK SPECIFIER PHRASES
+#################################
+
+that have a link to techcrunch.com
+that link to google.com
+that contain a link to facebook.com
+that include a link to cnn.com
+including a link to cnn.com
+having a link to cnn.com
+with a link to github.com/rails
+having links to seattle.gov
+
+#################################
+### TIME SPECIFIER PHRASE
+#################################
+
+sent before last monday
+sent after last monday
+sent on june 6th 2013
+sent after last week
+sent before last week
+sent last week
+sent yesterday
+
 #from Dan Roney with attachments
 #from Dan Roney regarding business reports
 #from matte without attachments
