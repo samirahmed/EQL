@@ -1,10 +1,11 @@
-
 import nltk
 import re
 import sys
 from termcolor import colored
 
-def parse(parser, terminals, query):
+def parse(parser, terminals, debug, query):
+ 
+  debug.write(query + "\n")
   
   words = query.lower().split()
   normalized = []
@@ -15,12 +16,15 @@ def parse(parser, terminals, query):
       if len(normalized) == 0 or normalized[-1] != 'term':
         normalized.append('term')
   
-  #print" ".join(normalized)
+  debug.write(" ".join(normalized) + "\n")
+  
   parsetree = parser.parse(normalized)
   if not parsetree:
     print colored("ERROR PARSING %s " % query, 'red'),
+    debug.write("PARSE ERROR \n")
   else:
     sys.stdout.write(colored('.', 'green'))
+    debug.write(str(parsetree) + "\n")
 
 
 lines = open("email.cfg").readlines()
@@ -35,9 +39,10 @@ print colored("Terminals %s" % terminals, 'yellow')
 
 count = 0
 
-for line in open('./queries.txt').readlines():
-  if line and not line.startswith("#") and len(line.split()) > 0:
-    parse(email_parser, terminals, line)
-    count += 1
+with  open("test.result","w") as debug: 
+  for line in open('./queries.txt').readlines():
+    if line and not line.startswith("#") and len(line.split()) > 0:
+      parse(email_parser, terminals, debug, line)
+      count += 1
 
 print "\n%d lines parsed" % count

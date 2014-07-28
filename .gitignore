@@ -1,4 +1,6 @@
 
+*.result
+
 #********** python template********** 
 
 *.py[cod]
