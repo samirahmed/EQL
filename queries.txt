@@ -1,0 +1,142 @@
+##############################
+#### CONTACT SPECIFIERS ONLY
+##############################
+
+# Simple Contact Specifiers only
+from Dan Roney
+from Dan Roney to Matthew Eckstein
+to Dan Roney
+from me to Dan Roney
+from Matthew to Dan Roney
+
+# more complex contact specifiers
+sent by dan roney
+sent from jeremy sanchez
+sent to matthew
+sent by dan
+sent by jamie callum to ellen page
+
+########################
+# TEXT SPECIFIERS ONLY
+#######################
+
+# include text specifiers
+that include statistics
+that mention X-MEN
+that discuss dogfooding
+that contain 51256 
+which contain 51256 
+
+# include-'ing' simple text specifiers
+about statistics
+including business reports
+with statical analysis
+mentioning dogfood criteria
+discussing dogfood criteria
+containing mvp candidates
+having facebook.com
+regarding mechanical engineering
+
+##############################################
+# Simple Contact Specifiers + Text Specifiers
+##############################################
+
+# CSP + TSP
+from Dan Roney regardign mechanical engineering
+from Dan Roney to Matthew Eckstein including material physics
+to Dan Roney about outlook.com
+from me to Dan Roney about outlook search options
+from Matthew to Dan Roney containing statistics
+sent by Satya Nadella to Dan Fanday regarding statistical methods
+sent to Steven Levitt from me including freakonomics
+sent from me to Robert Lee mentioning santa claus
+
+# Text specifiers + Simple Contact Specifiers
+about statistics from Dan Roney
+including business reports to Dan Roney
+with statical analysis from Matthew Eckstein to me
+mentioning dogfood criteria from me to me
+containing mvp candidates from Lawrence to me
+having facebook.com from James to me
+regarding mechanical engineering from marcel to me
+
+about statistics sent by me
+including business reports sent by steven magnuson to me
+with statical analysis sent from jamie kent
+mentioning dogfood criteria sent from daniel
+regarding mechanical engineering sent from me
+
+that discuss statistics sent by me
+that include business reports sent by steven magnuson to me
+that contain statical analysis sent from jamie kent
+which mention  dogfood criteria sent from daniel
+which have mechanical engineering sent from me
+
+###################################
+###  ATTACHMENT SPECIFIERS PHRASES
+###################################
+
+that have excel attachments
+that contain excel attachments
+that have .pdf attached
+which have pdf attachments
+
+containing .xlsx attachments
+containing powerpoint attachments
+including word attachments
+
+#from Dan Roney with attachments
+#from Dan Roney regarding business reports
+#from matte without attachments
+
+# that structure
+#that has excel attachments
+#that have excel attachments
+#that has an excel attachment
+#with excel attachments
+#including some excel attachments
+#
+#that have links to techchrunch
+#with links to techcrunch
+#with a link to techcrunch
+#containing a link to techcrunch
+#
+#
+#from Dan Roney sent around march
+#from Dan Roney sent last week
+#from Dan Roney sent in the last week
+#
+#
+#
+#about statistics
+#where i am on the to line
+#where i am on the cc line
+#
+#to me
+#since yesterday with attachments about statistics
+#before monday with attachments about statistics
+#after june 20th 2013 with attachments 
+#
+#since 7/10/20 with attachments from julie larson-green
+#
+#to,from,before,after,since,with,wihtout,having,containing,including,referencing,about,regarding 
+#
+#statistics?
+#
+#- complex queries
+#to me
+#from me
+#from me to alan
+#from alan to jamie about statistically pattern recognition
+#
+#from me contain statistical pattern recognition
+#
+#- direct queries ... 
+#
+#statistical pattern recognition
+#facebook profits
+#microsoft library references
+#satya ceo town hall
+#ashish codereview
+#
+#
