@@ -121,7 +121,7 @@ def parse(parser, terminals, query, debug):
 lines = open("email.cfg").readlines()
 grammar = '\n'.join(filter(lambda line: not line.startswith("%"),lines))
 cfg = nltk.parse_cfg(grammar)
-email_parser = nltk.RecursiveDescentParser(cfg)
+email_parser = nltk.LeftCornerChartParser(cfg)
 
 # get a set of all terminals in the grammar
 terminals = set(re.findall(r'[\"\'](.+?)[\"\']',grammar))
@@ -131,12 +131,16 @@ with  open("test.result","w") as debug:
   debug.write("Terminals %s" % terminals)
   for line in open('./queries.txt').readlines():
     if line and not line.startswith("#") and len(line.split()) > 0:
+      start = time.time()
       tree, wc = parse(email_parser, terminals, line, debug)
+      query = Query(tree, wc)
+      duration = time.time()-start
+      debug.write(str(query))
+      debug.write("duration %f \n" % duration)
+      
       count += 1
       if count % 50 == 0:
         sys.stdout.write("\n")
       sys.stdout.flush()
-      query = Query(tree, wc)
-      debug.write(str(query) + "\n")
 
 print "\n%d lines parsed" % count
