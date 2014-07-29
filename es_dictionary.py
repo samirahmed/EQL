@@ -61,5 +61,5 @@ class ElasticSearchQuery:
         return {"range": range}
 
     def sendQuery(self):
-        r = requests.post(GetConfig()["emailDbUrl"], data = self.json(), stream=True)
+        r = requests.post(GetConfig()["emailDbUrl"], data = self.json())
         return r.content
