@@ -1,11 +1,7 @@
-import nltk
-import json
-import time
-import re
-import sys
+import nltk, json, time, re, sys
 from termcolor import colored
 
-class AbstractSyntaxTree:
+class abstract_syntax_tree:
   
   duration = None
   tree = None
@@ -49,7 +45,7 @@ class AbstractSyntaxTree:
 
     words = self.query.lower().split()
     for word in words:
-      if word in terminals:
+      if word in self.terminals:
         self.normalized.append(word)
       else:
         if len(self.normalized) == 0 or self.normalized[-1] != 'term':
@@ -73,8 +69,7 @@ class AbstractSyntaxTree:
       sys.stdout.write( colored('.', 'green'))
       debug.write(str( self.tree) + "\n")
 
-class EmailQuery:
-  
+class nlq:
   sender          = None
   recipients      = None
   first_text      = None
@@ -158,27 +153,9 @@ class EmailQuery:
   
     for subtree in tree:
       self._visit(subtree, wildcards)
+  
+def parse(email_parser, terminals, query, debug):
+  ast = abstract_syntax_tree(email_parser, terminals, query, debug)
+  eq = nlq(ast)
+  return ast, eq
 
-lines = open("email.cfg").readlines()
-grammar = '\n'.join(filter(lambda line: not line.startswith("%"),lines))
-cfg = nltk.parse_cfg(grammar)
-email_parser = nltk.LeftCornerChartParser(cfg)
-
-# get a set of all terminals in the grammar
-terminals = set(re.findall(r'[\"\'](.+?)[\"\']',grammar))
-count = 0
-
-with  open("test.result","w") as debug: 
-  debug.write("Terminals %s" % terminals)
-  for line in open('./queries.txt').readlines():
-    if line and not line.startswith("#") and len(line.split()) > 0:
-      ast = AbstractSyntaxTree(email_parser, terminals, line, debug)
-      result = EmailQuery(ast)
-      debug.write((result).json())
-      debug.write("duration %f \n" % ast.duration)
-      count += 1
-      if count % 50 == 0:
-        sys.stdout.write("\n")
-      sys.stdout.flush()
-
-print "\n%d lines parsed" % count
