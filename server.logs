@@ -1,6 +1,0 @@
-
-sent by timur about mechanical engineering or systems engineeringNORMALIZED: sent by term about term or term
-WILDCARDS: ['timur', 'mechanical engineering', 'systems engineering'] 
-(S
-  (CSP (SCSP (FCSP (SENT sent) (BY by) (WC term))))
-  (TSP (CTSP (INCLUDING about) (WC term) (CONJ (OR or)) (WC term))))
