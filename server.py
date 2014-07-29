@@ -1,6 +1,6 @@
 import sys, os, faking
 from bottle import route, run, template, Bottle, request, response
-from grammar import terminals
+import grammar
 
 debug = sys.stdout
 app = Bottle()
@@ -13,7 +13,7 @@ def enable_cors():
 
 @app.route('/terminals')
 def terms():
-  return {'terms': list(terminals)}
+  return {'terms': list(grammar.terminals)}
 
 @app.route('/fake')
 def fake():

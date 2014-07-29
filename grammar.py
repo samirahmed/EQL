@@ -3,15 +3,15 @@ import abstract_syntax_tree
 import nlq
 
 lines = open("email.cfg").readlines()
-grammar = '\n'.join(filter(lambda line: not line.startswith("%"),lines))
-cfg = nltk.parse_cfg(grammar)
+raw_cfg = '\n'.join(filter(lambda line: not line.startswith("%"),lines))
+cfg = nltk.parse_cfg(raw_cfg)
 email_parser = nltk.LeftCornerChartParser(cfg)
 
 # get a set of all terminals in the grammar
-terminals = set(re.findall(r'[\"\'](.+?)[\"\']',grammar))
+terminals = set(re.findall(r'[\"\'](.+?)[\"\']',raw_cfg))
 count = 0
 
-with  open("test.result","w") as debug: 
+with open("test.result","w") as debug: 
   debug.write("Terminals %s" % terminals)
   for line in open('./queries.txt').readlines():
     if line and not line.startswith("#") and len(line.split()) > 0:
