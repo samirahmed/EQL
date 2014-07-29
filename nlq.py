@@ -64,7 +64,7 @@ class abstract_syntax_tree:
     if not self.tree:
       print colored("ERROR PARSING %s " % self.query, 'red'),
       debug.write("PARSE ERROR \n")
-      return false
+      return False
     else:
       sys.stdout.write( colored('.', 'green'))
       debug.write(str( self.tree) + "\n")

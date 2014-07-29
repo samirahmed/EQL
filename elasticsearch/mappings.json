@@ -1,0 +1,42 @@
+PUT _template/emails
+{
+      "order": 0,
+      "template": "emails-*",
+      "mappings": {
+         "email": {
+            "properties": {
+               "sender": {
+                  "index": "analyzed",
+                  "type": "string"
+               },
+               "recipients": {
+                  "index": "analyzed",
+                  "type": "string"
+               },
+               "subject_body": {
+                  "index": "analyzed",
+                  "type": "string"
+               },
+               "has_attachment": {
+                  "type": "bool"
+               },
+               "has_links": {
+                  "type": "bool"
+               },
+               "links": {
+                  "index": "analyzed",
+                  "type": "string"
+               },               
+               "sent_time": {
+                  "index": "not_analyzed",
+                  "type": "date"
+               },
+               "raw_data":
+               {
+                  "index": "analyzed",
+                  "type": "string"
+               }
+            }
+         }
+      }
+}
