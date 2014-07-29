@@ -1,4 +1,5 @@
 import nltk
+import json
 import time
 import re
 import sys
@@ -16,72 +17,79 @@ class Query:
   date_comparator = None
   link            = None
 
-  _last_node = None
+  index = 0
 
   def __init__(self, tree, wildcards):
     self._visit(tree, wildcards)
+    index = 0
   
   def __str__(self):
-    result = "Sender %s\n" % self.sender
-    result += "Recipients: %s\n" % self.recipients
-    result +=  "First Text: %s\n" % self.first_text
-    result +=  "Second Text: %s\n" % self.second_text
-    result +=  "Conjunction : %s\n" % self.conjunction
-    result +=  "Attachment : %s\n" % self.attachments
-    result +=  "Date : %s\n" % self.date
-    result +=  "Date Comparator : %s\n" % self.date_comparator
-    result +=  "Links : %s\n" % self.link
-    return result
+    return str(self.properties())
 
-  def _visit(self, tree, wildcards, index = 0 ):
+  def properties(self):
+    return {
+     'sender': self.sender,
+     'recipients': self.recipients,
+     'first_text': self.first_text,
+     'second_text': self.second_text,
+     'conjunction': self.conjunction,
+     'attachments': self.attachments,
+     'link': self.link,
+     'date': self.date,
+     'date_comparator' : self.date_comparator
+    }
+
+  def json(self):
+    return json.dumps(self.properties(), indent = 2)
+
+  def _visit(self, tree, wildcards):
     
     if not tree or not (type(tree) == nltk.tree.Tree):
       return
 
     if tree.node == "TCSP":    # To Contact Specifier
-      self.recipients = wildcards[index]
-      index += 1
+      self.recipients = wildcards[self.index]
+      self.index += 1
 
     elif tree.node == "FCSP":  # From Contact Specifier
-      self.sender = wildcards[index]
-      index += 1
+      self.sender = wildcards[self.index]
+      self.index += 1
 
     elif tree.node == "FTCSP": # From To Contact Specifier
-      self.sender = wildcards[index]
-      self.recipients = wildcards[index+1]
-      index += 2
+      self.sender = wildcards[self.index]
+      self.recipients = wildcards[self.index+1]
+      self.index += 2
 
     elif tree.node == "TFCSP": # To From Contact Specifier 
-      self.recipients = wildcards[index]
-      self.sender = wildcards[index+1]
-      index += 2
+      self.recipients = wildcards[self.index]
+      self.sender = wildcards[self.index+1]
+      self.index += 2
 
     elif tree.node == "FASP":  # Filename Attachment Specifier
-      self.attachments = wildcards[index]
-      index += 1
+      self.attachments = wildcards[self.index]
+      self.index += 1
 
     elif tree.node == "STSP":  # Single Text Specifier
-      self.first_text = wildcards[index]
-      index += 1
+      self.first_text = wildcards[self.index]
+      self.index += 1
 
     elif tree.node == "CTSP":  # Conjunctive Text Specifier
-      self.first_text = wildcards[index]
-      self.second_text = wildcards[index+1]
+      self.first_text = wildcards[self.index]
+      self.second_text = wildcards[self.index+1]
       self.conjunction = "and" if tree.leaves()[-2] == "and" else "or"
-      index += 2
+      self.index += 2
 
     elif tree.node == "LSP":   # Link Specifier
-      self.link = wildcards[index]
-      index += 1
+      self.link = wildcards[self.index]
+      self.index += 1
     
     elif tree.node == "DSP":   # DateTime Specifier
-      self.date = wildcards[index]
+      self.date = wildcards[self.index]
       self.date_comparator = "after" if tree.leaves()[-2] == "after" else "before"
-      index += 1
-
-    else:
-      for subtree in tree:
-        self._visit(subtree, wildcards, index)
+      self.index += 1
+  
+    for subtree in tree:
+      self._visit(subtree, wildcards)
 
 def normalize(terminals, query, debug):
   
@@ -135,7 +143,7 @@ with  open("test.result","w") as debug:
       tree, wc = parse(email_parser, terminals, line, debug)
       query = Query(tree, wc)
       duration = time.time()-start
-      debug.write(str(query))
+      debug.write((query).json())
       debug.write("duration %f \n" % duration)
       
       count += 1
