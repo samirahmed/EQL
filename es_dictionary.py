@@ -1,8 +1,18 @@
 import json
 import requests
+import yaml
+
+config = None
+
+def GetConfig():
+    global config
+    if config is None:
+        config = yaml.load(open("config.yaml"))
+    return config
 
 class ElasticSearchQuery:
     query = {}
+    config = None
 
     # create your query. Pass null for any unused values
     def __init__(self, toName, fromName, sendTimeStart, sendTimeEnd, bodyTerms):
@@ -50,7 +60,5 @@ class ElasticSearchQuery:
         return {"range": range}
 
     def sendQuery(self):
-        r = requests.post("http://tm2013u:9200/emails-test2/email/_search", data = self.json(), stream=True)
+        r = requests.post(GetConfig()["emailDbUrl"], data = self.json(), stream=True)
         return r.content
-
-print ElasticSearchQuery("alex","andy", "2014-07-28T10:30:23.123", None, ["hackathon","pizza"]).sendQuery()

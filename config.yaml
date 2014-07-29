@@ -1,0 +1,2 @@
+emailDbUrl: http://tm2013u:9200/emails-test2/email/_search
+dateServiceUrl: http://mangosteen-datetime.azurewebsites.net/?date=march
