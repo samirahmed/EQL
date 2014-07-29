@@ -9,6 +9,10 @@ from grammar_test import AbstractSyntaxTree, EmailQuery, email_parser, terminals
 
 debug = open("server.logs", "w")
 
+@route('/terminals')
+def terms():
+  return {'terms': list(terminals)}
+
 @route('/parse/<query>')
 def index(query):
   result = {}
