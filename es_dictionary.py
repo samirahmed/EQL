@@ -15,15 +15,16 @@ class ElasticSearchQuery:
     config = None
 
     # create your query. Pass null for any unused values
-    def __init__(self, toName, fromName, sendTimeStart, sendTimeEnd, bodyTerms):
+    def __init__(self, recipients, sender, sendTimeStart, sendTimeEnd, bodyTerms):
         boolDict={}
         shouldList = []
         mustList = []
 
-        if toName is not None:
-            shouldList.append(self.makeTerm("recipients", toName))
-        if fromName is not None:
-            shouldList.append(self.makeTerm("sender", fromName))
+        if recipients is not None:
+            for i in range (0, len(recipients)):
+                shouldList.append(self.makeTerm("recipients", recipients[i]))
+        if sender is not None:
+            shouldList.append(self.makeTerm("sender", sender))
         if bodyTerms is not None:
             for i in range (0, len(bodyTerms)):
                 shouldList.append(self.makeTerm("body", bodyTerms[i]))
