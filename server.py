@@ -7,7 +7,7 @@ from termcolor import colored
 from bottle import route, run, template
 from grammar_test import AbstractSyntaxTree, EmailQuery, email_parser, terminals
 
-debug = open("server.logs", "w")
+debug = sys.stdout
 
 @route('/terminals')
 def terms():

@@ -70,7 +70,7 @@ class AbstractSyntaxTree:
       debug.write("PARSE ERROR \n")
       return false
     else:
-      sys.stdout.write( colored(u'\u2713', 'green'))
+      sys.stdout.write( colored('.', 'green'))
       debug.write(str( self.tree) + "\n")
 
 class EmailQuery:
