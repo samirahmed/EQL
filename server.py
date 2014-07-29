@@ -1,6 +1,5 @@
-import sys, os, faking
+import sys, os, faking, grammar, query_rewriter
 from bottle import route, run, template, Bottle, request, response
-import grammar
 
 debug = sys.stdout
 app = Bottle()
@@ -23,8 +22,9 @@ def fake():
 def index(query):
   result = {}
   ast, eq = grammar.process(query, debug)
+  query_rewriter.augment(eq)
   result["extra"] = ast.properties()
-  result['result'] = eq.properties()
+  result["result"] = eq.properties()
   return result
 
 run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
