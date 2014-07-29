@@ -18,10 +18,10 @@ PUT _template/emails
                   "type": "string"
                },
                "has_attachment": {
-                  "type": "bool"
+                  "type": "boolean"
                },
                "has_links": {
-                  "type": "bool"
+                  "type": "boolean"
                },
                "links": {
                   "index": "analyzed",
