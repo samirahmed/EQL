@@ -1,0 +1,56 @@
+Terminals set(['and', 'attachments', 'links', 'including', 'have', 'before', 'containing', 'from', 'by', 'to', 'hyperlinks', 'attachment', 'which', 'include', 'sent', 'a', 'that', 'after', 'about', 'mention', 'link', 'term', 'with', 'discuss', 'mentioning', 'on', 'regarding', 'attached', 'or', 'contain', 'discussing', 'having'])
+from samirNORMALIZED: from term
+WILDCARDS: ['samir'] 
+(S (CSP (SCSP (FROM from) (WC term))))
+
+from samirNORMALIZED: from term
+WILDCARDS: ['samir'] 
+(S (CSP (SCSP (FROM from) (WC term))))
+
+emails before last marchNORMALIZED: term before term
+WILDCARDS: ['emails', 'last march'] 
+PARSE ERROR 
+
+ before last marchNORMALIZED: before term
+WILDCARDS: ['last march'] 
+PARSE ERROR 
+
+before last marchNORMALIZED: before term
+WILDCARDS: ['last march'] 
+PARSE ERROR 
+
+after last marchNORMALIZED: after term
+WILDCARDS: ['last march'] 
+PARSE ERROR 
+
+from dan roneyNORMALIZED: from term
+WILDCARDS: ['dan roney'] 
+(S (CSP (SCSP (FROM from) (WC term))))
+
+after januaryNORMALIZED: after term
+WILDCARDS: ['january'] 
+PARSE ERROR 
+
+from samirNORMALIZED: from term
+WILDCARDS: ['samir'] 
+(S (CSP (SCSP (FROM from) (WC term))))
+
+from samir to dan roney about mangosNORMALIZED: from term to term about term
+WILDCARDS: ['samir', 'dan roney', 'mangos'] 
+(S
+  (CSP (SCSP (FROM from) (WC term) (TO to) (WC term)))
+  (TSP (STSP (INCLUDING about) (WC term))))
+
+sent before last sundayNORMALIZED: sent before term
+WILDCARDS: ['last sunday'] 
+(S (DSP (SENT sent) (BEFORE before) (WC term)))
+
+sent by timur with links to techcrunchNORMALIZED: sent by term with links to term
+WILDCARDS: ['timur', 'techcrunch'] 
+PARSE ERROR 
+
+sent by timur about mechanical engineering or systems engineeringNORMALIZED: sent by term about term or term
+WILDCARDS: ['timur', 'mechanical engineering', 'systems engineering'] 
+(S
+  (CSP (SENT sent) (BY by) (WC term))
+  (TSP (STSP (INCLUDING about) (WC term) (CONJ (OR or)) (WC term))))
