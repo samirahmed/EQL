@@ -13,7 +13,7 @@ debug = open("server.logs", "w")
 def terms():
   return {'terms': list(terminals)}
 
-@route('/parse/<query>')
+@route('/debug/<query>')
 def index(query):
   result = {}
   ast = AbstractSyntaxTree(email_parser, terminals, query, debug)
