@@ -5,7 +5,75 @@ import re
 import sys
 from termcolor import colored
 
-class Query:
+class AbstractSyntaxTree:
+  
+  duration = None
+  tree = None
+  wildcards = None
+  normalized_query = None
+  query = None
+  terminals = None
+  parser = None
+
+  def __init__(self, parser, terminals, query, debug):
+    
+    start = time.time()
+    self.parser = parser
+    self.terminals = terminals
+    self.query = query
+    
+    self.normalize(debug)
+    self.parse(debug)
+    self.duration = time.time() - start
+
+  def __str__(self):
+    return str(self.properties())
+
+  def properties(self):
+    return {
+      'duration': self.duration,
+      'query' : self.query,
+      'normalized_query' : self.normalized,
+      'wildcards' : self.wildcards,
+      'tree' : self.tree.pprint(),
+    }
+
+  def json(self):
+    return json.dump(self.properties(), indent=2)
+
+  def normalize(self, debug):
+    
+    debug.write("\n" + self.query)
+    self.normalized = []
+    self.wildcards = []
+
+    words = self.query.lower().split()
+    for word in words:
+      if word in terminals:
+        self.normalized.append(word)
+      else:
+        if len(self.normalized) == 0 or self.normalized[-1] != 'term':
+          self.normalized.append('term')
+          self.wildcards.append(word)
+        else:
+          self.wildcards[-1] += " " + word
+    
+    debug.write("NORMALIZED: " + " ".join(self.normalized) + "\n")
+    debug.write("WILDCARDS: %s \n" % self.wildcards)
+
+  def parse(self, debug):
+   
+    self.tree = self.parser.parse(self.normalized)
+    
+    if not self.tree:
+      print colored("ERROR PARSING %s " % self.query, 'red'),
+      debug.write("PARSE ERROR \n")
+      return false
+    else:
+      sys.stdout.write( colored(u'\u2713', 'green'))
+      debug.write(str( self.tree) + "\n")
+
+class EmailQuery:
   
   sender          = None
   recipients      = None
@@ -19,8 +87,8 @@ class Query:
 
   index = 0
 
-  def __init__(self, tree, wildcards):
-    self._visit(tree, wildcards)
+  def __init__(self, ast):
+    self._visit(ast.tree, ast.wildcards)
     index = 0
   
   def __str__(self):
@@ -91,41 +159,6 @@ class Query:
     for subtree in tree:
       self._visit(subtree, wildcards)
 
-def normalize(terminals, query, debug):
-  
-  debug.write("\n" + query)
-  normalized = []
-  wildcards = []
-
-  words = query.lower().split()
-  for word in words:
-    if word in terminals:
-      normalized.append(word)
-    else:
-      if len(normalized) == 0 or normalized[-1] != 'term':
-        normalized.append('term')
-        wildcards.append(word)
-      else:
-        wildcards[-1] += " " + word
-  
-  debug.write("NORMALIZED: " + " ".join(normalized) + "\n")
-  debug.write("WILDCARDS: %s \n" % wildcards)
-  return normalized, wildcards
-
-def parse(parser, terminals, query, debug):
- 
-  normalized, wildcards = normalize(terminals, query, debug);
-  parsetree = parser.parse(normalized)
-  
-  if not parsetree:
-    print colored("ERROR PARSING %s " % query, 'red'),
-    debug.write("PARSE ERROR \n")
-    return false
-  else:
-    sys.stdout.write(colored(u'\u2713', 'green'))
-    debug.write(str(parsetree) + "\n")
-    return parsetree, wildcards
-
 lines = open("email.cfg").readlines()
 grammar = '\n'.join(filter(lambda line: not line.startswith("%"),lines))
 cfg = nltk.parse_cfg(grammar)
@@ -139,13 +172,10 @@ with  open("test.result","w") as debug:
   debug.write("Terminals %s" % terminals)
   for line in open('./queries.txt').readlines():
     if line and not line.startswith("#") and len(line.split()) > 0:
-      start = time.time()
-      tree, wc = parse(email_parser, terminals, line, debug)
-      query = Query(tree, wc)
-      duration = time.time()-start
-      debug.write((query).json())
-      debug.write("duration %f \n" % duration)
-      
+      ast = AbstractSyntaxTree(email_parser, terminals, line, debug)
+      result = EmailQuery(ast)
+      debug.write((result).json())
+      debug.write("duration %f \n" % ast.duration)
       count += 1
       if count % 50 == 0:
         sys.stdout.write("\n")
