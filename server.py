@@ -29,4 +29,4 @@ def index(query):
   result["emails"] = es.ElasticSearchQuery(eq).sendQuery() 
   return result
 
-run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+run(app, host="127.0.0.1", port=int(os.environ.get("PORT", 5000)))

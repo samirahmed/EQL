@@ -80,6 +80,7 @@ class nlq:
   date_is_parsed  = None
   date_comparator = None
   link            = None
+  scope           = None
 
   index = 0
 
@@ -100,7 +101,8 @@ class nlq:
      'attachments': self.attachments,
      'link': self.link,
      'date': self.date,
-     'date_comparator' : self.date_comparator
+     'date_comparator': self.date_comparator,
+     'scope': self.scope
     }
 
   def json(self):
@@ -149,7 +151,10 @@ class nlq:
     
     elif tree.node == "DSP":   # DateTime Specifier
       self.date = wildcards[self.index]
-      self.date_comparator = "after" if tree.leaves()[-2] == "after" else "before"
+      if tree.leaves()[-2] == "after":
+          self.date_comparator = "after"
+      elif tree.leaves()[-2] == "before":
+          self.date_comparator = "before"
       self.index += 1
   
     for subtree in tree:
