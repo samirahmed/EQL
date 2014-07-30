@@ -1,4 +1,5 @@
 import json, requests, yaml
+from datetime import datetime,timedelta
 
 config = None
 
@@ -25,6 +26,12 @@ class ElasticSearchQuery:
                 end_time = nlq.date
             elif nlq.date_comparator == "after":
                 start_time = nlq.date
+            elif nlq.date_comparator == None:
+                if nlq.scope == "day":
+                    start_time = nlq.date
+                    endDate = datetime.strptime(nlq.date, "%Y-%m-%dT%H:%M:%S-07:00") + timedelta(days=1)
+                    end_time = endDate.strftime("%Y-%m-%dT%H:%M:%S-07:00")
+
 
         if nlq.first_text:
             body_terms.append(nlq.first_text)
