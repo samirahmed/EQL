@@ -141,7 +141,7 @@ class nlq:
       self.index += 1
 
     elif tree.node == "HASP":  # Has Attachment Specifier
-      self.has_attachments = "True"
+      self.has_attachments = True
 
     elif tree.node == "STSP":  # Single Text Specifier
       self.first_text = wildcards[self.index]
@@ -153,12 +153,13 @@ class nlq:
       self.conjunction = "and" if tree.leaves()[-2] == "and" else "or"
       self.index += 2
 
-    elif tree.node == "FLSP":   # Link Specifier
+    elif tree.node == "TLSP":   # Text Link Specifier
+      self.has_links = True
       self.link = wildcards[self.index]
       self.index += 1
 
-    elif tree.node == "HLSP":  # Has Links
-      self.has_links = "True"
+    elif tree.node == "HLSP":  # Has Link Specifier
+      self.has_links = True
     
     elif tree.node == "DSP":   # DateTime Specifier
       self.date = wildcards[self.index]

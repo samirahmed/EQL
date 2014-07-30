@@ -50,10 +50,10 @@ class ElasticSearchQuery:
             for i in range (0, len(body_terms)):
                 shouldList.append(self.makeTerm("body",body_terms[i]))
 
-        if nlq.has_attachments == "True":
-            shouldList.append(self.makeTerm("has_attachment", "True"))
-        if nlq.has_links == "True":
-            shouldList.append(self.makeTerm("has_links", "True"))
+        if nlq.has_attachments is not None:
+            shouldList.append(self.makeTerm("has_attachment", nlq.has_attachments))
+        if nlq.has_links is not None:
+            shouldList.append(self.makeTerm("has_links", nlq.has_links))
         if nlq.link is not None:
             shouldList.append(self.makeTerm("links", nlq.link))
         if start_time is not None or end_time is not None:
@@ -76,7 +76,7 @@ class ElasticSearchQuery:
     def makeTerm(self, name, value):
         term = {}
         term[name]={}
-        term[name]["value"] = value.lower()
+        term[name]["value"] = str(value).lower()
         return {"term": term}
 
     def makeRange(self, start, end):
