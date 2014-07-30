@@ -37,16 +37,27 @@ def fake(query):
 
 @app.route('/parse/<query>')
 def parse(query):
+  req_start = time.time()
+  
   result = {}
-  start = time.time()
   ast, eq = grammar.process(query, debug)
+  
+  aug_start = time.time()
   query_rewriter.augment(eq)
+  aug_end = time.time()
+
+  es_start = time.time()
+  emails = es.ElasticSearchQuery(eq).sendQuery() 
+  es_end = time.time()
+
   result["syntax"] = ast.properties()
   result["parse_terms"] = eq.parse_terms()
-  result["emails"] = es.ElasticSearchQuery(eq).sendQuery() 
+  result["emails"] = emails
   result["result"] = { 
     "parse_success": True, 
-    "duration" : time.time()-start, 
+    "duration" : time.time()- req_start, 
+    "augemtnation_duration": aug_end - aug_start,
+    "query_duration" : es_end - es_start,
     "count" : len(result["emails"])
     }
   return result
