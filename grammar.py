@@ -2,8 +2,39 @@ import nltk, sys, re, os, json
 import abstract_syntax_tree
 import nlq
 
+def generate(aggregate, remaining, left, so_far = []):
+  if left < 0:
+    aggregate.append("S -> " + " ".join(so_far))
+    return
+  
+  for term in remaining:
+    
+    updated = list(so_far)
+    updated.append(term)
+
+    diff = set(remaining)
+    diff = diff.difference(set([term]))
+    
+    generate(aggregate, diff, left-1, updated)
+
+def bootstrap_grammar(lines):
+  atomic_specifier_phrases = set(lines[0][1:].split())
+  grammar_lines = filter(lambda line: not line.startswith("%"),lines)
+  
+  additional_lines = []
+
+  for size in range(len(atomic_specifier_phrases)):
+    generate(additional_lines, atomic_specifier_phrases, size)
+
+  additional_lines.extend(grammar_lines)
+  return additional_lines
+
 lines = open("email.cfg").readlines()
-raw_cfg = '\n'.join(filter(lambda line: not line.startswith("%"),lines))
+raw_cfg = '\n'.join(bootstrap_grammar(lines))
+
+with open("processed_grammar.result", "w") as processed_grammar:
+  processed_grammar.write(raw_cfg)
+
 cfg = nltk.parse_cfg(raw_cfg)
 email_parser = nltk.LeftCornerChartParser(cfg)
 

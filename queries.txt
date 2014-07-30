@@ -116,6 +116,29 @@ sent after last week
 sent before last week
 sent last week
 sent yesterday
+after last friday
+before last thursday
+
+###############################
+### 3 term complex queries
+###############################
+
+sent after march 1st about physics or peanuts with links to techcrunch
+sent from samir ahmed to dan roney about physics or peanuts with links to groupon
+
+###############################
+### 4 term complex queries
+###############################
+#
+sent from me to you about nothing with links to nothing sent after march
+sent from me to you  including word attachments sent after march with links to techcrunch
+
+###############################
+### 5 term complex queries
+###############################
+#
+sent from me to you about nothing with links to nothing sent after march including powerpoint attachments
+sent from me to you  including word attachments sent after march with links to techcrunch about statistics and baby monkies
 
 #from Dan Roney with attachments
 #from Dan Roney regarding business reports
