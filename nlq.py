@@ -1,4 +1,4 @@
-import nltk, json, time, re, sys
+import nltk, json, time, sys
 from termcolor import colored
 
 class abstract_syntax_tree:
@@ -75,11 +75,13 @@ class nlq:
   first_text      = None
   second_text     = None
   conjunction     = None
+  has_attachments = None
   attachments     = None
   date            = None
   date_is_parsed  = None
   date_comparator = None
   link            = None
+  has_links       = None
   scope           = None
 
   index = 0
@@ -121,7 +123,9 @@ class nlq:
      'second_text': self.second_text,
      'conjunction': self.conjunction,
      'attachments': self.attachments,
+     'has_attachments': self.has_attachments,
      'link': self.link,
+     'has_links': self.has_links,
      'date': self.date,
      'date_comparator': self.date_comparator,
      'scope': self.scope
@@ -155,7 +159,11 @@ class nlq:
 
     elif tree.node == "FASP":  # Filename Attachment Specifier
       self.attachments = wildcards[self.index]
+      self.has_attachments = True
       self.index += 1
+
+    elif tree.node == "HASP":  # Has Attachment Specifier
+      self.has_attachments = True
 
     elif tree.node == "STSP":  # Single Text Specifier
       self.first_text = wildcards[self.index]
@@ -167,9 +175,13 @@ class nlq:
       self.conjunction = "and" if tree.leaves()[-2] == "and" else "or"
       self.index += 2
 
-    elif tree.node == "LSP":   # Link Specifier
+    elif tree.node == "TLSP":   # Text Link Specifier
+      self.has_links = True
       self.link = wildcards[self.index]
       self.index += 1
+
+    elif tree.node == "HLSP":  # Has Link Specifier
+      self.has_links = True
     
     elif tree.node == "DSP":   # DateTime Specifier
       self.date = wildcards[self.index]
