@@ -77,6 +77,7 @@ class nlq:
   conjunction     = None
   attachments     = None
   date            = None
+  date_is_parsed  = None
   date_comparator = None
   link            = None
 

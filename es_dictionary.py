@@ -1,6 +1,4 @@
-import json
-import requests
-import yaml
+import json, requests, yaml
 
 config = None
 
@@ -22,23 +20,23 @@ class ElasticSearchQuery:
         end_time = None
         body_terms = []
 
-        if nlq.date_comparator == "before":
-          end_time = nlq.date.strftime('%Y-%m-%dT%H:%M:%S')
-        elif nlq.date_comparator == "after":
-          start_time = nlq.date.strftime('%Y-%m-%dT%H:%M:%S')
+        if nlq.date_is_parsed:
+            if nlq.date_comparator == "before":
+                end_time = nlq.date
+            elif nlq.date_comparator == "after":
+                start_time = nlq.date
 
         if nlq.first_text:
-          body_terms.append(nlq.first_text)
+            body_terms.append(nlq.first_text)
         if nlq.second_text:
-          body_terms.append(nlq.second_text)
+            body_terms.append(nlq.second_text)
         
         boolDict={}
         shouldList = []
         mustList = []
 
         if recipients is not None:
-            for i in range (0, len(recipients)):
-                shouldList.append(self.makeTerm("recipients", recipients[i]))
+            shouldList.append(self.makeTerm("recipients", recipients))
         if sender is not None:
             shouldList.append(self.makeTerm("sender", sender))
         if body_terms is not None:
@@ -76,6 +74,20 @@ class ElasticSearchQuery:
             range["dateSent"]["to"] = end
         return {"range": range}
 
+    def extract(self, hits):
+      return json.loads(hits["_source"]["raw_data"])
+
     def sendQuery(self):
-        r = requests.post(GetConfig()["emailDbUrl"], data = self.json())
-        return r.content
+        payload = self.json()
+        print GetConfig()["emailDbUrl"]
+        print payload
+        
+        r = requests.post(GetConfig()["emailDbUrl"], data = payload)
+        
+        try:
+          body = json.loads(r.content)
+          print json.dumps(body, indent=2)
+          return [self.extract(item) for item in body["hits"]["hits"]]
+        except Exception,e: 
+          print str(e)
+          return []

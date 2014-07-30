@@ -26,8 +26,7 @@ def index(query):
   query_rewriter.augment(eq)
   result["extra"] = ast.properties()
   result["result"] = eq.properties()
-  emails = es.ElasticSearchQuery(eq).sendQuery() 
-  result["elastic_search"] = json.loads(emails)
+  result["emails"] = es.ElasticSearchQuery(eq).sendQuery() 
   return result
 
 run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))

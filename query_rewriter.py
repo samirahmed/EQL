@@ -9,7 +9,7 @@ def augment_datetime(raw):
   if (resp.status_code == 200):
     if (resp.text != "null"):
       date =  datetime.strptime(str(resp.text), "%d-%b-%Y")
-      return date.strftime('%Y-%m-%dT%H:%M:%S')
+      return date.strftime('%Y-%m-%dT%H:%M:%S-07:00')
   else:
     return datetime
 
@@ -18,5 +18,6 @@ def augment(query):
     print "augmenting"
     augmented = augment_datetime(query.date)
     if augmented:
+      query.date_is_parsed = True
       query.date = augmented
 
