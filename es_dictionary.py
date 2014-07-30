@@ -1,19 +1,30 @@
 import json
 import requests
+import yaml
+
+config = None
+
+def GetConfig():
+    global config
+    if config is None:
+        config = yaml.load(open("config.yaml"))
+    return config
 
 class ElasticSearchQuery:
     query = {}
+    config = None
 
     # create your query. Pass null for any unused values
-    def __init__(self, toName, fromName, sendTimeStart, sendTimeEnd, bodyTerms):
+    def __init__(self, recipients, sender, sendTimeStart, sendTimeEnd, bodyTerms):
         boolDict={}
         shouldList = []
         mustList = []
 
-        if toName is not None:
-            shouldList.append(self.makeTerm("recipients", toName))
-        if fromName is not None:
-            shouldList.append(self.makeTerm("sender", fromName))
+        if recipients is not None:
+            for i in range (0, len(recipients)):
+                shouldList.append(self.makeTerm("recipients", recipients[i]))
+        if sender is not None:
+            shouldList.append(self.makeTerm("sender", sender))
         if bodyTerms is not None:
             for i in range (0, len(bodyTerms)):
                 shouldList.append(self.makeTerm("body", bodyTerms[i]))
@@ -50,7 +61,5 @@ class ElasticSearchQuery:
         return {"range": range}
 
     def sendQuery(self):
-        r = requests.post("http://tm2013u:9200/emails-test2/email/_search", data = self.json(), stream=True)
+        r = requests.post(GetConfig()["emailDbUrl"], data = self.json())
         return r.content
-
-print ElasticSearchQuery("alex","andy", "2014-07-28T10:30:23.123", None, ["hackathon","pizza"]).sendQuery()
