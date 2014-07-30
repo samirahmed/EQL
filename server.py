@@ -11,6 +11,10 @@ def enable_cors():
   response.headers['Access-Control-Allow-Methods'] = 'PUT, GET, POST, DELETE, OPTIONS'
   response.headers['Access-Control-Allow-Headers'] = 'Origin, Accept, Content-Type, X-Requested-With, X-CSRF-Token'
 
+@app.route('/')
+def index():
+  return "MANGOSTEEN"
+
 @app.route('/terminals')
 def terms():
   return {'terms': list(grammar.terminals)}
@@ -19,8 +23,23 @@ def terms():
 def fake():
   return faking.fake_search()
 
+@app.route('/query/<sentence>')
+def parse(sentence):
+  result = {}
+  ast, eq = grammar.process(query, debug)
+  query_rewriter.augment(eq)
+  result["extra"] = ast.properties()
+  result["result"] = eq.properties()
+  result["emails"] = es.ElasticSearchQuery(eq).sendQuery() 
+  result["result"] = { 
+    "parse_success": True, 
+    "duration" : 0.2, 
+    "count" : len(result["emails"])
+    }
+  return result
+
 @app.route('/debug/<query>')
-def index(query):
+def debug_parse(query):
   result = {}
   ast, eq = grammar.process(query, debug)
   query_rewriter.augment(eq)
