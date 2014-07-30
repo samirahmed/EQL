@@ -37,28 +37,29 @@ def fake(query):
 
 @app.route('/parse/<query>')
 def parse(query):
+  req_start = time.time()
+  
   result = {}
-  start = time.time()
   ast, eq = grammar.process(query, debug)
+  
+  aug_start = time.time()
   query_rewriter.augment(eq)
-  result["extra"] = ast.properties()
-  result["result"] = eq.properties()
-  result["emails"] = es.ElasticSearchQuery(eq).sendQuery() 
+  aug_end = time.time()
+
+  es_start = time.time()
+  emails = es.ElasticSearchQuery(eq).sendQuery() 
+  es_end = time.time()
+
+  result["syntax"] = ast.properties()
+  result["parse_terms"] = eq.parse_terms()
+  result["emails"] = emails
   result["result"] = { 
     "parse_success": True, 
-    "duration" : time.time()-start, 
+    "duration" : time.time()- req_start, 
+    "augemtnation_duration": aug_end - aug_start,
+    "query_duration" : es_end - es_start,
     "count" : len(result["emails"])
     }
-  return result
-
-@app.route('/parse/debug/<query>')
-def debug_parse(query):
-  result = {}
-  ast, eq = grammar.process(query, debug)
-  query_rewriter.augment(eq)
-  result["extra"] = ast.properties()
-  result["result"] = eq.properties()
-  result["emails"] = es.ElasticSearchQuery(eq).sendQuery() 
   return result
 
 run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
