@@ -115,3 +115,36 @@ class ElasticSearchQuery:
         except Exception,e: 
           print str(e)
           return []
+
+
+def resolve_contact(prefix):
+  if not prefix or len(prefix) <= 1: 
+    return []
+
+  try:
+    url = GetConfig()["contactUrl"]
+    payload = json.dumps({
+      "senders" : 
+        {
+          "text" : str(prefix).lower(),
+          "completion" : 
+            {
+              "field" : "contact_suggest",
+              "fuzzy": True
+            }
+        }
+    }, indent=2)
+    
+    print url
+    print payload
+    
+    r = requests.post(url, data = payload)
+
+    body = json.loads(r.content)
+    options = body["senders"][0]["options"]
+    names =  [str(option["text"]) for option in options]
+    print names
+    return names
+  except Exception, e:
+    print str(e)
+    return []
