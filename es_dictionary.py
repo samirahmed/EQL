@@ -42,21 +42,25 @@ class ElasticSearchQuery:
         shouldList = []
         mustList = []
 
-        if recipients is not None:
-            shouldList.append(self.makeTerm("recipients", recipients))
-        if sender is not None:
-            shouldList.append(self.makeTerm("sender", sender))
-        if body_terms is not None:
+        if recipients:
+            mustList.append(self.makeTerm("recipients", recipients))
+        if sender:
+            mustList.append(self.makeTerm("sender", sender))
+        if body_terms:
             for i in range (0, len(body_terms)):
-                shouldList.append(self.makeTerm("body",body_terms[i]))
+                mustList.append(self.makeTerm("subject_body",body_terms[i]))
 
         if nlq.has_attachments is not None:
-            shouldList.append(self.makeTerm("has_attachment", nlq.has_attachments))
+            mustList.append(self.makeTerm("has_attachment", nlq.has_attachments))
+        if nlq.attachments:
+            mustList.append(self.makeMatch("attachments", nlq.attachments))
+
         if nlq.has_links is not None:
-            shouldList.append(self.makeTerm("has_links", nlq.has_links))
-        if nlq.link is not None:
-            shouldList.append(self.makeTerm("links", nlq.link))
-        if start_time is not None or end_time is not None:
+            mustList.append(self.makeTerm("has_links", nlq.has_links))
+        if nlq.link:
+            mustList.append(self.makeMatch("links", nlq.link))
+
+        if start_time or end_time:
             mustList.append(self.makeRange(start_time, end_time))
 
         boolDict["should"] = shouldList
@@ -87,6 +91,12 @@ class ElasticSearchQuery:
         if end is not None:
             range["sent_time"]["to"] = end
         return {"range": range}
+
+    def makeMatch(self, name, value):
+        match = {}
+        match[name]={}
+        match[name]["query"] = str(value).lower()
+        return {"match": match}
 
     def extract(self, hits):
       return json.loads(hits["_source"]["raw_data"])
