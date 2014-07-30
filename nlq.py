@@ -158,22 +158,7 @@ class nlq:
       self.index += 2
 
     elif tree.node == "FASP":  # Filename Attachment Specifier
-      search_term = wildcards[self.index]
-      if search_term == "excel" or search_term == "spreadsheet":
-          self.attachments = "xls xlsx"
-      elif search_term == "word":
-          self.attachments = "doc docx"
-      elif search_term == "powerpoint" or search_term == "presentation":
-          self.attachments = "ppt pptx"
-      elif search_term == "image" or search_term == "picture":
-          self.attachments = "jpg png tiff bmp"
-      elif search_term == "video" or search_term == "movie":
-          self.attachments = "mpeg mpg wmv"
-      elif search_term == "audio" or search_term == "music":
-          self.attachments = "wma"
-      else:
-          self.attachments = search_term
-
+      self.attachments = wildcards[self.index]
       self.has_attachments = True
       self.index += 1
 

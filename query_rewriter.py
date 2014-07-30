@@ -11,7 +11,11 @@ def augment_datetime(raw):
   resp = api.get(datetime_server, params = {"date": raw})
   if (resp.status_code == 200):
     if (resp.text != "null"):
-      return datetime.strptime(str(resp.text), "%d-%b-%Y")
+      date_temp = datetime.strptime(str(resp.text), "%Y-%m-%dT%H:%M:%S-07:00")
+      if datetime.now().year < date_temp.year:
+        date_temp.year = datetime.now().year
+      elif datetime.now() < date_temp:
+        date_temp -= timedelta(days = 7)
   else:
     return None
 
@@ -24,14 +28,22 @@ def augment(query):
         query.scope = "month"
     date_temp = None
     if query.date == "this year":
-        date_temp = date(datetime.now().year,1,1)
+        date_temp = date(datetime.now().year,1,1).strftime('%Y-%m-%dT%H:%M:%S-07:00')
     elif query.date == "this month":
-        date_temp = date(datetime.now().year, datetime.now().month, 1)
+        date_temp = date(datetime.now().year, datetime.now().month, 1).strftime('%Y-%m-%dT%H:%M:%S-07:00')
     else:
-        date_temp = augment_datetime(query.date)
-        if datetime.now().year < date_temp.year:
-            date_temp.year = datetime.now().year
-        if datetime.now() < date_temp:
-            date_temp = date_temp - timedelta(days = 7)
-    query.date = date_temp.strftime('%Y-%m-%dT%H:%M:%S-07:00')
+        query.date = augment_datetime(query.date)
     query.date_is_parsed = True
+  if query.attachments:
+      if query.attachments == "excel" or query.attachments == "spreadsheet":
+          query.attachments = "xls xlsx"
+      elif query.attachments == "word":
+          query.attachments = "doc docx"
+      elif query.attachments == "powerpoint" or query.attachments == "presentation":
+          query.attachments = "ppt pptx"
+      elif query.attachments == "image" or query.attachments == "picture":
+          query.attachments = "jpg png tiff bmp"
+      elif query.attachments == "video" or query.attachments == "movie":
+          query.attachments = "mpeg mpg wmv"
+      elif query.attachments == "audio" or query.attachments == "music":
+          query.attachments = "wma"
