@@ -5,6 +5,9 @@ from bottle import route, run, template, Bottle, request, response
 debug = sys.stdout
 app = Bottle()
 
+def wsgi():
+  return app;
+
 @app.hook('after_request')
 def enable_cors():
   response.headers['Access-Control-Allow-Origin'] = '*'
@@ -24,7 +27,7 @@ def fake():
   return faking.fake_search()
 
 @app.route('/query/<sentence>')
-def parse(sentence):
+def parse(query):
   result = {}
   ast, eq = grammar.process(query, debug)
   query_rewriter.augment(eq)
@@ -48,4 +51,4 @@ def debug_parse(query):
   result["emails"] = es.ElasticSearchQuery(eq).sendQuery() 
   return result
 
-run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+#run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
