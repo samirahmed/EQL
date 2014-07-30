@@ -1,4 +1,4 @@
-import sys, os, faking, grammar, query_rewriter, json
+import sys, os, faking, grammar, query_rewriter, json, time
 import es_dictionary as es
 from bottle import route, run, template, Bottle, request, response
 
@@ -26,13 +26,14 @@ def terms():
 def terms(prefix):
   return { "contacts" : faking.fake_contact_resolution(prefix) }
 
-@app.route('/fake')
-def fake():
+@app.route('/parse/fake/<query>')
+def fake(query):
   return faking.fake_search()
 
-@app.route('/query/<sentence>')
+@app.route('/parse/<query>')
 def parse(query):
   result = {}
+  start = time.time()
   ast, eq = grammar.process(query, debug)
   query_rewriter.augment(eq)
   result["extra"] = ast.properties()
@@ -40,12 +41,12 @@ def parse(query):
   result["emails"] = es.ElasticSearchQuery(eq).sendQuery() 
   result["result"] = { 
     "parse_success": True, 
-    "duration" : 0.2, 
+    "duration" : time.time()-start, 
     "count" : len(result["emails"])
     }
   return result
 
-@app.route('/debug/<query>')
+@app.route('/parse/debug/<query>')
 def debug_parse(query):
   result = {}
   ast, eq = grammar.process(query, debug)
