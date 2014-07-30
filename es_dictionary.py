@@ -43,19 +43,19 @@ class ElasticSearchQuery:
         mustList = []
 
         if recipients is not None:
-            shouldList.append(self.makeTerm("recipients", recipients))
+            mustList.append(self.makeTerm("recipients", recipients))
         if sender is not None:
-            shouldList.append(self.makeTerm("sender", sender))
+            mustList.append(self.makeTerm("sender", sender))
         if body_terms is not None:
             for i in range (0, len(body_terms)):
-                shouldList.append(self.makeTerm("body",body_terms[i]))
+                mustList.append(self.makeTerm("subject_body",body_terms[i]))
 
         if nlq.has_attachments is not None:
-            shouldList.append(self.makeTerm("has_attachment", nlq.has_attachments))
+            mustList.append(self.makeTerm("has_attachment", nlq.has_attachments))
         if nlq.has_links is not None:
-            shouldList.append(self.makeTerm("has_links", nlq.has_links))
+            mustList.append(self.makeTerm("has_links", nlq.has_links))
         if nlq.link is not None:
-            shouldList.append(self.makeTerm("links", nlq.link))
+            mustList.append(self.makeTerm("links", nlq.link))
         if start_time is not None or end_time is not None:
             mustList.append(self.makeRange(start_time, end_time))
 
