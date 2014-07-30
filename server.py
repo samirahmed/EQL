@@ -1,4 +1,5 @@
-import sys, os, faking, grammar, query_rewriter
+import sys, os, faking, grammar, query_rewriter, json
+import es_dictionary as es
 from bottle import route, run, template, Bottle, request, response
 
 debug = sys.stdout
@@ -25,6 +26,8 @@ def index(query):
   query_rewriter.augment(eq)
   result["extra"] = ast.properties()
   result["result"] = eq.properties()
+  emails = es.ElasticSearchQuery(eq).sendQuery() 
+  result["elastic_search"] = json.loads(emails)
   return result
 
 run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))

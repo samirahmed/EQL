@@ -15,7 +15,23 @@ class ElasticSearchQuery:
     config = None
 
     # create your query. Pass null for any unused values
-    def __init__(self, recipients, sender, sendTimeStart, sendTimeEnd, bodyTerms):
+    def __init__(self, nlq): 
+        recipients = nlq.recipients
+        sender = nlq.sender
+        start_time = None
+        end_time = None
+        body_terms = []
+
+        if nlq.date_comparator == "before":
+          end_time = nlq.date.strftime('%Y-%m-%dT%H:%M:%S')
+        elif nlq.date_comparator == "after":
+          start_time = nlq.date.strftime('%Y-%m-%dT%H:%M:%S')
+
+        if nlq.first_text:
+          body_terms.append(nlq.first_text)
+        if nlq.second_text:
+          body_terms.append(nlq.second_text)
+        
         boolDict={}
         shouldList = []
         mustList = []
@@ -25,11 +41,11 @@ class ElasticSearchQuery:
                 shouldList.append(self.makeTerm("recipients", recipients[i]))
         if sender is not None:
             shouldList.append(self.makeTerm("sender", sender))
-        if bodyTerms is not None:
-            for i in range (0, len(bodyTerms)):
-                shouldList.append(self.makeTerm("body", bodyTerms[i]))
-        if sendTimeStart is not None or sendTimeEnd is not None:
-            mustList.append(self.makeRange(sendTimeStart, sendTimeEnd))
+        if body_terms is not None:
+            for i in range (0, len(body_terms)):
+                shouldList.append(self.makeTerm("body",body_terms[i]))
+        if start_time is not None or end_time is not None:
+            mustList.append(self.makeRange(start_time, end_time))
 
         boolDict["should"] = shouldList
         boolDict["must"] = mustList
