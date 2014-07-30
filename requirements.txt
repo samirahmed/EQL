@@ -3,4 +3,5 @@ nltk==2.0.4
 termcolor==1.1.0
 fake-factory==0.4.0
 requests==2.3.0
+pyenchant==1.6.6
 
