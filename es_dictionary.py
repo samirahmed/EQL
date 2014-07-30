@@ -27,6 +27,7 @@ class ElasticSearchQuery:
                 end_time = nlq.date
             else:
                 start_time = nlq.date
+                print start_time
                 if nlq.scope == "day":
                     endDate = datetime.strptime(nlq.date, "%Y-%m-%dT%H:%M:%S-07:00") + timedelta(days=1)
                     end_time = endDate.strftime("%Y-%m-%dT%H:%M:%S-07:00")
