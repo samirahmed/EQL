@@ -56,7 +56,7 @@ def parse(query):
   result["result"] = { 
     "parse_success": True, 
     "duration" : time.time()- req_start, 
-    "augemtnation_duration": aug_end - aug_start,
+    "augmentation_duration": aug_end - aug_start,
     "query_duration" : es_end - es_start,
     "count" : len(result["emails"])
     }
