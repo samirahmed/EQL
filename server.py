@@ -24,7 +24,7 @@ def terms():
 
 @app.route('/fake/contacts/<prefix>')
 def terms(prefix):
-  return faking.fake_contact(prefix)
+  return { "contacts" : faking.fake_contact_resolution(prefix) }
 
 @app.route('/fake')
 def fake():
