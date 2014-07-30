@@ -1,5 +1,5 @@
-import json, requests, yaml
-from datetime import datetime,timedelta
+import json, requests, yaml, calendar
+from datetime import datetime,timedelta,date
 
 config = None
 
@@ -19,19 +19,20 @@ class ElasticSearchQuery:
         sender = nlq.sender
         start_time = None
         end_time = None
+        min_should_match = 0
         body_terms = []
 
         if nlq.date_is_parsed:
             if nlq.date_comparator == "before":
                 end_time = nlq.date
-            elif nlq.date_comparator == "after":
+            else:
                 start_time = nlq.date
-            elif nlq.date_comparator == None:
                 if nlq.scope == "day":
-                    start_time = nlq.date
                     endDate = datetime.strptime(nlq.date, "%Y-%m-%dT%H:%M:%S-07:00") + timedelta(days=1)
                     end_time = endDate.strftime("%Y-%m-%dT%H:%M:%S-07:00")
-
+                elif nlq.scope == "month":
+                    endDate = add_months(datetime.strptime(nlq.date, "%Y-%m-%dT%H:%M:%S-07:00"), 1)
+                    end_time = endDate.strftime("%Y-%m-%dT%H:%M:%S-07:00")
 
         if nlq.first_text:
             body_terms.append(nlq.first_text)
@@ -54,17 +55,16 @@ class ElasticSearchQuery:
             mustList.append(self.makeTerm("has_attachment", nlq.has_attachments))
         if nlq.attachments:
             mustList.append(self.makeMatch("attachments", nlq.attachments))
-
         if nlq.has_links is not None:
             mustList.append(self.makeTerm("has_links", nlq.has_links))
         if nlq.link:
             mustList.append(self.makeMatch("links", nlq.link))
-
         if start_time or end_time:
             mustList.append(self.makeRange(start_time, end_time))
 
         boolDict["should"] = shouldList
         boolDict["must"] = mustList
+        boolDict["minimum_should_match"] = min_should_match
         self.query["bool"] = boolDict
 
     def __str__(self):
@@ -115,3 +115,10 @@ class ElasticSearchQuery:
         except Exception,e: 
           print str(e)
           return []
+
+def add_months(sourcedate, months):
+    month = sourcedate.month - 1 + months
+    year = sourcedate.year + month / 12
+    month = month % 12 + 1
+    day = min(sourcedate.day,calendar.monthrange(year,month)[1])
+    return date(year,month,day)
