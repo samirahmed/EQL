@@ -49,6 +49,13 @@ class ElasticSearchQuery:
         if body_terms is not None:
             for i in range (0, len(body_terms)):
                 shouldList.append(self.makeTerm("body",body_terms[i]))
+
+        if nlq.has_attachments == "True":
+            shouldList.append(self.makeTerm("has_attachment", "True"))
+        if nlq.has_links == "True":
+            shouldList.append(self.makeTerm("has_links", "True"))
+        if nlq.link is not None:
+            shouldList.append(self.makeTerm("links", nlq.link))
         if start_time is not None or end_time is not None:
             mustList.append(self.makeRange(start_time, end_time))
 
