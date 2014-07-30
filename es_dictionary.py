@@ -44,12 +44,12 @@ class ElasticSearchQuery:
         mustList = []
 
         if recipients:
-            mustList.append(self.makeTerm("recipients", recipients))
+            mustList.append(self.makeMatch("recipients", recipients))
         if sender:
-            mustList.append(self.makeTerm("sender", sender))
+            mustList.append(self.makeMatch("sender", sender))
         if body_terms:
             for i in range (0, len(body_terms)):
-                mustList.append(self.makeTerm("subject_body",body_terms[i]))
+                mustList.append(self.makeMatch("subject_body",body_terms[i]))
 
         if nlq.has_attachments is not None:
             mustList.append(self.makeTerm("has_attachment", nlq.has_attachments))
@@ -96,6 +96,8 @@ class ElasticSearchQuery:
         match = {}
         match[name]={}
         match[name]["query"] = str(value).lower()
+        match[name]["fuzziness"] = 1
+        match[name]["prefix_length"] = 1
         return {"match": match}
 
     def extract(self, hits):
