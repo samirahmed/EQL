@@ -91,6 +91,28 @@ class nlq:
   def __str__(self):
     return str(self.properties())
 
+  def parse_terms(self):
+    terms = {}
+
+    if self.sender:
+      terms["sender"] = self.sender
+    if self.recipients:
+      terms["recipients"] = self.recipients
+    if self.first_text and self.second_text and self.conjunction:
+      terms["query"] = "%s %s %s" % (self.first_text, self.conjunction, self.second_text)
+    elif self.first_text:
+      terms["query"] = self.first_text
+    if self.attachments:
+      terms["attachments"] = self.attachments
+    if self.link:
+      terms["link"] = self.link
+    if self.scope and self.date:
+      terms["date"] = self.date
+    elif self.date_comparator and self.date:
+      terms["date"] = self.date_comparator + " " + self.date
+
+    return terms
+
   def properties(self):
     return {
      'sender': self.sender,
