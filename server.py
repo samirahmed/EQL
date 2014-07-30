@@ -16,7 +16,12 @@ def enable_cors():
 
 @app.route('/')
 def index():
-  return "MANGOSTEEN"
+  global app
+  info = ""
+  for route in app.routes:
+    url = route.rule.replace('<','{').replace('>','}')
+    info += "<code>%s %s </code><br/>" % (route.method, url)
+  return info
 
 @app.route('/terminals')
 def terms():
