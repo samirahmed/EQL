@@ -67,11 +67,11 @@ class ElasticSearchQuery:
 
     def makeRange(self, start, end):
         range = {}
-        range["dateSent"] = {}
+        range["sent_time"] = {}
         if start is not None:
-            range["dateSent"]["from"] = start
+            range["sent_time"]["from"] = start
         if end is not None:
-            range["dateSent"]["to"] = end
+            range["sent_time"]["to"] = end
         return {"range": range}
 
     def extract(self, hits):
