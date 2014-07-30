@@ -31,7 +31,7 @@ class abstract_syntax_tree:
       'query' : self.query,
       'normalized_query' : self.normalized,
       'wildcards' : self.wildcards,
-      'tree' : self.tree.pprint(),
+      'tree' : self.tree.pprint() if self.tree else "()",
     }
 
   def json(self):
