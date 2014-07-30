@@ -1,7 +1,13 @@
 from faker import Factory
 from datetime import datetime
+import marisa_trie as trie
 
 faker = Factory.create()
+all_contacts = trie.Trie(set(open("./contacts.txt",'r').readlines()))
+
+def fake_contact_resolution(prefix):
+  global all_contacts
+  return str(all_contacts.keys(unicode(prefix)))
 
 def fake_contact(times):
   global faker

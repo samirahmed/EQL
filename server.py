@@ -22,6 +22,10 @@ def index():
 def terms():
   return {'terms': list(grammar.terminals)}
 
+@app.route('/fake/contacts/<prefix>')
+def terms(prefix):
+  return faking.fake_contact(prefix)
+
 @app.route('/fake')
 def fake():
   return faking.fake_search()
