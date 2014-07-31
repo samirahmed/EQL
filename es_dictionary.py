@@ -1,4 +1,4 @@
-import json, requests, yaml, calendar
+import json, requests, yaml, calendar, re
 from datetime import datetime,timedelta,date
 
 config = None
@@ -12,6 +12,7 @@ def GetConfig():
 class ElasticSearchQuery:
     query = {}
     config = None
+    body_terms = None
 
     # create your query. Pass null for any unused values
     def __init__(self, nlq): 
@@ -67,6 +68,7 @@ class ElasticSearchQuery:
         boolDict["must"] = mustList
         boolDict["minimum_should_match"] = min_should_match
         self.query["bool"] = boolDict
+        self.body_terms = body_terms
 
     def __str__(self):
         return str(self.properties())
@@ -102,7 +104,37 @@ class ElasticSearchQuery:
         return {"match": match}
 
     def extract(self, hits):
-      return json.loads(hits["_source"]["raw_data"])
+      parsed = json.loads(hits["_source"]["raw_data"])
+      body = parsed["body"]
+
+      processed = body
+      words = processed.split()
+
+      modified = []
+
+      for term in self.body_terms:
+        regex = re.compile("(%s)" % term, re.IGNORECASE)
+        for index in range(len(words)):
+          if re.match(regex, words[index]):
+            words[index] = "<em>" + words[index]  + "</em>"
+            modified.append(index)
+
+
+      if len(modified) < 1:
+        return parsed
+
+      first_index = modified[0]
+      # welcome to E-the hotel of E_the best place in E-the world
+      start = max(first_index-10,0)
+      end = min(first_index+10,len(words))
+
+      preview = "..." +  " ".join(words[start:end]) + '...'
+
+      body = " ".join(words)
+
+      parsed["body"] = body
+      parsed["body_preview"] = preview
+      return parsed
 
     def sendQuery(self):
         payload = self.json()
