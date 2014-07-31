@@ -31,10 +31,6 @@ def terms():
 def contact(prefix):
   return {'contacts': es.resolve_contact(prefix)} 
 
-@app.route('/fake/contacts/<prefix>')
-def terms(prefix):
-  return { "contacts" : faking.fake_contact_resolution(prefix) }
-
 @app.route('/parse/fake/<query>')
 def fake(query):
   return faking.fake_search()
