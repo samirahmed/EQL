@@ -161,16 +161,16 @@ class ElasticSearchQuery:
             return None
 
     def sendSuggestQuery(self):
-        
         suggest = requests.post(GetConfig()["suggestUrl"], data = json.dumps(self.suggestionQuery, indent=2))
         suggestions = []
         suggest_body = json.loads(suggest.content)
+        print suggest_body
         new_query = self.user_query
         has_corrections = False
         for item in suggest_body:
             if not item == "_shards":
-                has_corrections = True
                 if len(suggest_body[item][0]["options"]) > 0:
+                    has_corrections = True
                     new_query = new_query.replace(suggest_body[item][0]["text"], suggest_body[item][0]["options"][0]["text"])
 
         if has_corrections:
