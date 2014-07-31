@@ -28,12 +28,12 @@ def augment_datetime(raw):
 
 def augment(query):
   if query.date:
-    
-    if query.date in days:
-        query.scope = "day"
-    
-    elif query.date in months:
-        query.scope = "month"
+
+    if not query.date_comparator:
+        if query.date in days:
+            query.scope = "day"
+        elif query.date in months:
+            query.scope = "month"
     
     date_temp = None
     

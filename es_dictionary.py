@@ -31,13 +31,13 @@ class ElasticSearchQuery:
                 end_time = nlq.date
             else:
                 start_time = nlq.date
-                print start_time
-                if nlq.scope == "day":
-                    endDate = datetime.strptime(nlq.date, "%Y-%m-%dT%H:%M:%S-07:00") + timedelta(days=1)
-                    end_time = endDate.strftime("%Y-%m-%dT%H:%M:%S-07:00")
-                elif nlq.scope == "month":
-                    endDate = add_months(datetime.strptime(nlq.date, "%Y-%m-%dT%H:%M:%S-07:00"), 1)
-                    end_time = endDate.strftime("%Y-%m-%dT%H:%M:%S-07:00")
+                if not "after" == nlq.date_comparator:
+                    if nlq.scope == "day":
+                        endDate = datetime.strptime(nlq.date, "%Y-%m-%dT%H:%M:%S-07:00") + timedelta(days=1)
+                        end_time = endDate.strftime("%Y-%m-%dT%H:%M:%S-07:00")
+                    elif nlq.scope == "month":
+                        endDate = add_months(datetime.strptime(nlq.date, "%Y-%m-%dT%H:%M:%S-07:00"), 1)
+                        end_time = endDate.strftime("%Y-%m-%dT%H:%M:%S-07:00")
 
         if nlq.first_text:
             body_terms.append(nlq.first_text)
@@ -166,11 +166,13 @@ class ElasticSearchQuery:
         suggestions = []
         suggest_body = json.loads(suggest.content)
         new_query = self.user_query
+        terms = []
         for item in suggest_body:
             print item
             if not item == "_shards":
                 print suggest_body[item][0]
                 if len(suggest_body[item][0]["options"]) > 0:
+                    #corrected
                     new_query = new_query.replace(suggest_body[item][0]["text"], suggest_body[item][0]["options"][0]["text"])
 
         suggestions.append(new_query)
