@@ -5,5 +5,7 @@ fake-factory==0.4.0
 requests==2.3.0
 pyenchant==1.6.6
 marisa-trie==0.6
+gunicorn==19.1.0
+
 
 

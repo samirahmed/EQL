@@ -1,4 +1,4 @@
-import json, requests, yaml, calendar
+import json, requests, yaml, calendar, re
 from datetime import datetime,timedelta,date
 
 config = None
@@ -10,11 +10,15 @@ def GetConfig():
     return config
 
 class ElasticSearchQuery:
+    user_query = None
     query = {}
+    suggestionQuery = {}
     config = None
+    body_terms = None
 
     # create your query. Pass null for any unused values
-    def __init__(self, nlq): 
+    def __init__(self, nlq):
+        self.user_query = nlq.query
         recipients = nlq.recipients
         sender = nlq.sender
         start_time = None
@@ -45,21 +49,26 @@ class ElasticSearchQuery:
         mustList = []
 
         if recipients:
-            mustList.append(self.makeMatch("recipients", recipients))
+            mustList.append(self.makeMatch("recipients", recipients, True))
+            self.suggestionQuery["recipients"] = self.makeSuggestion("recipients", recipients)
         if sender:
-            mustList.append(self.makeMatch("sender", sender))
+            mustList.append(self.makeMatch("sender", sender, True))
+            self.suggestionQuery["sender"] = self.makeSuggestion("sender", sender)
         if body_terms:
             for i in range (0, len(body_terms)):
-                mustList.append(self.makeMatch("subject_body",body_terms[i]))
+                mustList.append(self.makeMatch("subject_body",body_terms[i],False))
+                self.suggestionQuery["subject_body" + str(i)] = self.makeSuggestion("subject_body",body_terms[i])
 
         if nlq.has_attachments is not None:
             mustList.append(self.makeTerm("has_attachment", nlq.has_attachments))
         if nlq.attachments:
-            mustList.append(self.makeMatch("attachments", nlq.attachments))
+            mustList.append(self.makeMatch("attachments", nlq.attachments,False))
+            self.suggestionQuery["attachments"] = self.makeSuggestion("attachments", nlq.attachments)
         if nlq.has_links is not None:
             mustList.append(self.makeTerm("has_links", nlq.has_links))
         if nlq.link:
-            mustList.append(self.makeMatch("links", nlq.link))
+            mustList.append(self.makeMatch("links", nlq.link,False))
+            self.suggestionQuery["links"] = self.makeSuggestion("links", nlq.link)
         if start_time or end_time:
             mustList.append(self.makeRange(start_time, end_time))
 
@@ -67,6 +76,7 @@ class ElasticSearchQuery:
         boolDict["must"] = mustList
         boolDict["minimum_should_match"] = min_should_match
         self.query["bool"] = boolDict
+        self.body_terms = body_terms
 
     def __str__(self):
         return str(self.properties())
@@ -93,31 +103,96 @@ class ElasticSearchQuery:
             range["sent_time"]["to"] = end
         return {"range": range}
 
-    def makeMatch(self, name, value):
+    def makeMatch(self, name, value, useAnd):
         match = {}
         match[name]={}
         match[name]["query"] = str(value).lower()
         match[name]["fuzziness"] = 1
         match[name]["prefix_length"] = 1
+        if useAnd:
+            match[name]["operator"] = "and"
         return {"match": match}
 
+    def makeSuggestion(self, name, value):
+        suggestion = {}
+        suggestion["text"] = value
+        term = {}
+        term["field"] = name
+        suggestion["term"] = term
+        return suggestion
+
     def extract(self, hits):
-      return json.loads(hits["_source"]["raw_data"])
+      parsed = json.loads(hits["_source"]["raw_data"])
+      body = parsed["body"]
+
+      processed = body
+      words = processed.split()
+
+      modified = []
+
+      for term in self.body_terms:
+        regex = re.compile("(%s)" % term, re.IGNORECASE)
+        for index in range(len(words)):
+          if re.match(regex, words[index]):
+            words[index] = "<em>" + words[index]  + "</em>"
+            modified.append(index)
+
+
+      if len(modified) < 1:
+        return parsed
+
+      first_index = modified[0]
+      # welcome to E-the hotel of E_the best place in E-the world
+      start = max(first_index-10,0)
+      end = min(first_index+10,len(words))
+
+      preview = "..." +  " ".join(words[start:end]) + '...'
+
+      body = " ".join(words)
+
+      parsed["body"] = body
+      parsed["body_preview"] = preview
+      return parsed
+
+    def getSuggestion(self, suggestion):
+        if len(suggestion["options"]) > 0:
+            return suggestion["options"][0]
+        else:
+            return None
+
+    def sendSuggestQuery(self):
+        
+        suggest = requests.post(GetConfig()["suggestUrl"], data = json.dumps(self.suggestionQuery, indent=2))
+        suggestions = []
+        suggest_body = json.loads(suggest.content)
+        new_query = self.user_query
+        for item in suggest_body:
+            print item
+            if not item == "_shards":
+                print suggest_body[item][0]
+                if len(suggest_body[item][0]["options"]) > 0:
+                    new_query = new_query.replace(suggest_body[item][0]["text"], suggest_body[item][0]["options"][0]["text"])
+
+        suggestions.append(new_query)
+        print suggestions
+        return suggestions
 
     def sendQuery(self):
         payload = self.json()
         print GetConfig()["emailDbUrl"]
         print payload
-        
-        r = requests.post(GetConfig()["emailDbUrl"], data = payload)
-        
+
         try:
+          r = requests.post(GetConfig()["emailDbUrl"], data = payload)
           body = json.loads(r.content)
           print json.dumps(body, indent=2)
-          return [self.extract(item) for item in body["hits"]["hits"]]
+          total = body["hits"]["total"]
+          emails =  [self.extract(item) for item in body["hits"]["hits"]]
+          return emails, total
         except Exception,e: 
           print str(e)
-          return []
+          return [] , 0
+
 
 def add_months(sourcedate, months):
     month = sourcedate.month - 1 + months
@@ -139,7 +214,7 @@ def resolve_contact(prefix):
           "completion" : 
             {
               "field" : "contact_suggest",
-              "fuzzy": True
+              "fuzzy": False
             }
         }
     }, indent=2)

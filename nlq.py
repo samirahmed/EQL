@@ -83,10 +83,12 @@ class nlq:
   link            = None
   has_links       = None
   scope           = None
+  query           = None
 
   index = 0
 
   def __init__(self, ast):
+    self.query = ast.query
     self._visit(ast.tree, ast.wildcards)
     index = 0
   
