@@ -47,7 +47,7 @@ def parse(query):
   aug_end = time.time()
 
   es_start = time.time()
-  emails = es.ElasticSearchQuery(eq).sendQuery() 
+  emails, total = es.ElasticSearchQuery(eq).sendQuery() 
   es_end = time.time()
 
   result["syntax"] = ast.properties()
@@ -58,6 +58,7 @@ def parse(query):
     "duration" : time.time()- req_start, 
     "augmentation_duration": aug_end - aug_start,
     "query_duration" : es_end - es_start,
+    "total" : total,
     "count" : len(result["emails"])
     }
   return result

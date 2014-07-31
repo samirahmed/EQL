@@ -146,10 +146,12 @@ class ElasticSearchQuery:
         try:
           body = json.loads(r.content)
           print json.dumps(body, indent=2)
-          return [self.extract(item) for item in body["hits"]["hits"]]
+          total = body["hits"]["total"]
+          emails =  [self.extract(item) for item in body["hits"]["hits"]]
+          return emails, total
         except Exception,e: 
           print str(e)
-          return []
+          return [] , 0
 
 def add_months(sourcedate, months):
     month = sourcedate.month - 1 + months
