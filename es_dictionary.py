@@ -50,10 +50,10 @@ class ElasticSearchQuery:
 
         if recipients:
             mustList.append(self.makeMatch("recipients", recipients, True))
-            self.suggestionQuery["recipients"] = self.makeSuggestion("recipients", recipients)
+            #self.suggestionQuery["recipients"] = self.makeSuggestion("recipients", recipients)
         if sender:
             mustList.append(self.makeMatch("sender", sender, True))
-            self.suggestionQuery["sender"] = self.makeSuggestion("sender", sender)
+            #self.suggestionQuery["sender"] = self.makeSuggestion("sender", sender)
         if body_terms:
             for i in range (0, len(body_terms)):
                 mustList.append(self.makeMatch("subject_body",body_terms[i],False))
@@ -166,23 +166,15 @@ class ElasticSearchQuery:
         suggestions = []
         suggest_body = json.loads(suggest.content)
         new_query = self.user_query
-        terms = []
-        coords = {}
+        has_corrections = False
         for item in suggest_body:
-            print item
             if not item == "_shards":
-                print suggest_body[item][0]
+                has_corrections = True
                 if len(suggest_body[item][0]["options"]) > 0:
-                    corrected = suggest_body[item][0]["options"][0]["text"]
-                    new_query = new_query.replace(suggest_body[item][0]["text"], corrected)
-                    terms.append(corrected)
+                    new_query = new_query.replace(suggest_body[item][0]["text"], suggest_body[item][0]["options"][0]["text"])
 
-        if len(terms) > 0:
+        if has_corrections:
             suggestions.append(new_query)
-            for i in range(0, len(terms)):
-                coords[new_query.find(terms[i])] = str(len(terms[i]))
-            for item in sorted(coords, reverse=True):
-                suggestions.append(str(item) + "," + coords[item])
         return suggestions
 
     def sendQuery(self):
