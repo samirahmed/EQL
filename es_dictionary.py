@@ -10,11 +10,14 @@ def GetConfig():
     return config
 
 class ElasticSearchQuery:
+    user_query = None
     query = {}
+    suggestionQuery = {}
     config = None
 
     # create your query. Pass null for any unused values
-    def __init__(self, nlq): 
+    def __init__(self, nlq):
+        self.user_query = nlq.query
         recipients = nlq.recipients
         sender = nlq.sender
         start_time = None
@@ -46,20 +49,25 @@ class ElasticSearchQuery:
 
         if recipients:
             mustList.append(self.makeMatch("recipients", recipients, True))
+            self.suggestionQuery["recipients"] = self.makeSuggestion("recipients", recipients)
         if sender:
             mustList.append(self.makeMatch("sender", sender, True))
+            self.suggestionQuery["sender"] = self.makeSuggestion("sender", sender)
         if body_terms:
             for i in range (0, len(body_terms)):
                 mustList.append(self.makeMatch("subject_body",body_terms[i],False))
+                self.suggestionQuery["subject_body" + str(i)] = self.makeSuggestion("subject_body",body_terms[i])
 
         if nlq.has_attachments is not None:
             mustList.append(self.makeTerm("has_attachment", nlq.has_attachments))
         if nlq.attachments:
             mustList.append(self.makeMatch("attachments", nlq.attachments,False))
+            self.suggestionQuery["attachments"] = self.makeSuggestion("attachments", nlq.attachments)
         if nlq.has_links is not None:
             mustList.append(self.makeTerm("has_links", nlq.has_links))
         if nlq.link:
             mustList.append(self.makeMatch("links", nlq.link,False))
+            self.suggestionQuery["links"] = self.makeSuggestion("links", nlq.link)
         if start_time or end_time:
             mustList.append(self.makeRange(start_time, end_time))
 
@@ -103,8 +111,22 @@ class ElasticSearchQuery:
             match[name]["operator"] = "and"
         return {"match": match}
 
+    def makeSuggestion(self, name, value):
+        suggestion = {}
+        suggestion["text"] = value
+        term = {}
+        term["field"] = name
+        suggestion["term"] = term
+        return suggestion
+
     def extract(self, hits):
       return json.loads(hits["_source"]["raw_data"])
+
+    def getSuggestion(self, suggestion):
+        if len(suggestion["options"]) > 0:
+            return suggestion["options"][0]
+        else:
+            return None
 
     def sendQuery(self):
         payload = self.json()
@@ -112,14 +134,28 @@ class ElasticSearchQuery:
         print payload
         
         r = requests.post(GetConfig()["emailDbUrl"], data = payload)
-        
+        suggest = requests.post(GetConfig()["suggestUrl"], data = json.dumps(self.suggestionQuery, indent=2))
+        suggestions = []
+        suggest_body = json.loads(suggest.content)
+        new_query = self.user_query
+        for item in suggest_body:
+            print item
+            if not item == "_shards":
+                print suggest_body[item][0]
+                if len(suggest_body[item][0]["options"]) > 0:
+                    new_query = new_query.replace(suggest_body[item][0]["text"], suggest_body[item][0]["options"][0]["text"])
+
+        suggestions.append(new_query)
+        print suggestions
+        #["sender"][0]["options"][0]["text"]
         try:
           body = json.loads(r.content)
-          print json.dumps(body, indent=2)
-          return [self.extract(item) for item in body["hits"]["hits"]]
+          #print json.dumps(body, indent=2)
+          return suggestions,[self.extract(item) for item in body["hits"]["hits"]]
         except Exception,e: 
           print str(e)
           return []
+
 
 def add_months(sourcedate, months):
     month = sourcedate.month - 1 + months

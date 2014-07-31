@@ -51,11 +51,12 @@ def parse(query):
   aug_end = time.time()
 
   es_start = time.time()
-  emails = es.ElasticSearchQuery(eq).sendQuery() 
+  suggestions, emails = es.ElasticSearchQuery(eq).sendQuery()
   es_end = time.time()
 
   result["syntax"] = ast.properties()
   result["parse_terms"] = eq.parse_terms()
+  result["suggestions"] = suggestions
   result["emails"] = emails
   result["result"] = { 
     "parse_success": True, 
