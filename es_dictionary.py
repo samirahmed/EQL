@@ -1,4 +1,4 @@
-import json, requests, yaml, calendar
+import json, requests, yaml, calendar, re
 from datetime import datetime,timedelta,date
 
 config = None
@@ -14,6 +14,7 @@ class ElasticSearchQuery:
     query = {}
     suggestionQuery = {}
     config = None
+    body_terms = None
 
     # create your query. Pass null for any unused values
     def __init__(self, nlq):
@@ -75,6 +76,7 @@ class ElasticSearchQuery:
         boolDict["must"] = mustList
         boolDict["minimum_should_match"] = min_should_match
         self.query["bool"] = boolDict
+        self.body_terms = body_terms
 
     def __str__(self):
         return str(self.properties())
@@ -120,7 +122,37 @@ class ElasticSearchQuery:
         return suggestion
 
     def extract(self, hits):
-      return json.loads(hits["_source"]["raw_data"])
+      parsed = json.loads(hits["_source"]["raw_data"])
+      body = parsed["body"]
+
+      processed = body
+      words = processed.split()
+
+      modified = []
+
+      for term in self.body_terms:
+        regex = re.compile("(%s)" % term, re.IGNORECASE)
+        for index in range(len(words)):
+          if re.match(regex, words[index]):
+            words[index] = "<em>" + words[index]  + "</em>"
+            modified.append(index)
+
+
+      if len(modified) < 1:
+        return parsed
+
+      first_index = modified[0]
+      # welcome to E-the hotel of E_the best place in E-the world
+      start = max(first_index-10,0)
+      end = min(first_index+10,len(words))
+
+      preview = "..." +  " ".join(words[start:end]) + '...'
+
+      body = " ".join(words)
+
+      parsed["body"] = body
+      parsed["body_preview"] = preview
+      return parsed
 
     def getSuggestion(self, suggestion):
         if len(suggestion["options"]) > 0:
@@ -128,12 +160,8 @@ class ElasticSearchQuery:
         else:
             return None
 
-    def sendQuery(self):
-        payload = self.json()
-        print GetConfig()["emailDbUrl"]
-        print payload
+    def sendSuggestQuery(self):
         
-        r = requests.post(GetConfig()["emailDbUrl"], data = payload)
         suggest = requests.post(GetConfig()["suggestUrl"], data = json.dumps(self.suggestionQuery, indent=2))
         suggestions = []
         suggest_body = json.loads(suggest.content)
@@ -147,14 +175,23 @@ class ElasticSearchQuery:
 
         suggestions.append(new_query)
         print suggestions
-        #["sender"][0]["options"][0]["text"]
+        return suggestions
+
+    def sendQuery(self):
+        payload = self.json()
+        print GetConfig()["emailDbUrl"]
+        print payload
+
         try:
+          r = requests.post(GetConfig()["emailDbUrl"], data = payload)
           body = json.loads(r.content)
-          #print json.dumps(body, indent=2)
-          return suggestions,[self.extract(item) for item in body["hits"]["hits"]]
+          print json.dumps(body, indent=2)
+          total = body["hits"]["total"]
+          emails =  [self.extract(item) for item in body["hits"]["hits"]]
+          return emails, total
         except Exception,e: 
           print str(e)
-          return []
+          return [] , 0
 
 
 def add_months(sourcedate, months):
@@ -177,7 +214,7 @@ def resolve_contact(prefix):
           "completion" : 
             {
               "field" : "contact_suggest",
-              "fuzzy": True
+              "fuzzy": False
             }
         }
     }, indent=2)

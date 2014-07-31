@@ -1,3 +1,4 @@
-emailDbUrl: http://mangosteen-es.cloudapp.net:9200/emails-test101/email/_search
+emailDbUrl: http://mangosteen-es2.cloudapp.net:9200/emails-final/email/_search
 dateServiceUrl: http://mangosteen-datetime.azurewebsites.net
-contactUrl: http://mangosteen-es.cloudapp.net:9200/emails-test101/_suggest
+contactUrl: http://mangosteen-es2.cloudapp.net:9200/emails-final/_suggest
+suggestUrl: http://mangosteen-es2.cloudapp.net:9200/emails-final/_suggest

@@ -31,10 +31,6 @@ def terms():
 def contact(prefix):
   return {'contacts': es.resolve_contact(prefix)} 
 
-@app.route('/fake/contacts/<prefix>')
-def terms(prefix):
-  return { "contacts" : faking.fake_contact_resolution(prefix) }
-
 @app.route('/parse/fake/<query>')
 def fake(query):
   return faking.fake_search()
@@ -49,10 +45,16 @@ def parse(query):
   aug_start = time.time()
   query_rewriter.augment(eq)
   aug_end = time.time()
+  
+  es_instance = es.ElasticSearchQuery(eq)
 
   es_start = time.time()
-  suggestions, emails = es.ElasticSearchQuery(eq).sendQuery()
+  emails, total = es_instance.sendQuery()
   es_end = time.time()
+
+  sug_start = time.time()
+  suggestions = es_instance.sendSuggestQuery()
+  sug_end = time.time()
 
   result["syntax"] = ast.properties()
   result["parse_terms"] = eq.parse_terms()
@@ -63,8 +65,13 @@ def parse(query):
     "duration" : time.time()- req_start, 
     "augmentation_duration": aug_end - aug_start,
     "query_duration" : es_end - es_start,
+    "suggestion_time" : sug_end - sug_start,
+    "total" : total,
     "count" : len(result["emails"])
     }
   return result
 
-run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+if os.environ.get("PORT"):
+  run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), server='gunicorn', debug=True, workers=4) 
+else:
+  run(app, host="127.0.0.1", port=5000)
