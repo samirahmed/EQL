@@ -46,21 +46,21 @@ class ElasticSearchQuery:
         mustList = []
 
         if recipients:
-            mustList.append(self.makeMatch("recipients", recipients))
+            mustList.append(self.makeMatch("recipients", recipients, True))
         if sender:
-            mustList.append(self.makeMatch("sender", sender))
+            mustList.append(self.makeMatch("sender", sender, True))
         if body_terms:
             for i in range (0, len(body_terms)):
-                mustList.append(self.makeMatch("subject_body",body_terms[i]))
+                mustList.append(self.makeMatch("subject_body",body_terms[i],False))
 
         if nlq.has_attachments is not None:
             mustList.append(self.makeTerm("has_attachment", nlq.has_attachments))
         if nlq.attachments:
-            mustList.append(self.makeMatch("attachments", nlq.attachments))
+            mustList.append(self.makeMatch("attachments", nlq.attachments,False))
         if nlq.has_links is not None:
             mustList.append(self.makeTerm("has_links", nlq.has_links))
         if nlq.link:
-            mustList.append(self.makeMatch("links", nlq.link))
+            mustList.append(self.makeMatch("links", nlq.link,False))
         if start_time or end_time:
             mustList.append(self.makeRange(start_time, end_time))
 
@@ -95,12 +95,14 @@ class ElasticSearchQuery:
             range["sent_time"]["to"] = end
         return {"range": range}
 
-    def makeMatch(self, name, value):
+    def makeMatch(self, name, value, useAnd):
         match = {}
         match[name]={}
         match[name]["query"] = str(value).lower()
         match[name]["fuzziness"] = 1
         match[name]["prefix_length"] = 1
+        if useAnd:
+            match[name]["operator"] = "and"
         return {"match": match}
 
     def extract(self, hits):
