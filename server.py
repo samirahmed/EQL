@@ -62,4 +62,4 @@ def parse(query):
     }
   return result
 
-run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), server='gunicorn', debug=True, workers=4)
