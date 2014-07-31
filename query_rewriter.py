@@ -15,8 +15,8 @@ def augment_datetime(raw):
     if (resp.text != "null"):
       date_temp = datetime.strptime(str(resp.text), "%Y-%m-%dT%H:%M:%S-07:00")
       
-      if datetime.now().year < date_temp.year:
-        date_temp.year = datetime.now().year
+      if datetime.now().month < date_temp.month:
+        date_temp = date(datetime.now().year - 1, date_temp.month, date_temp.day)
       
       elif datetime.now() < date_temp:
         date_temp -= timedelta(days = 7)
@@ -38,10 +38,10 @@ def augment(query):
     date_temp = None
     
     if query.date == "this year":
-        date_temp = date(datetime.now().year,1,1).strftime('%Y-%m-%dT%H:%M:%S-07:00')
+        query.date = date(datetime.now().year,1,1).strftime('%Y-%m-%dT%H:%M:%S-07:00')
     
     elif query.date == "this month":
-        date_temp = date(datetime.now().year, datetime.now().month, 1).strftime('%Y-%m-%dT%H:%M:%S-07:00')
+        query.date = date(datetime.now().year, datetime.now().month, 1).strftime('%Y-%m-%dT%H:%M:%S-07:00')
     
     else:
         query.date = augment_datetime(query.date)
