@@ -167,16 +167,22 @@ class ElasticSearchQuery:
         suggest_body = json.loads(suggest.content)
         new_query = self.user_query
         terms = []
+        coords = {}
         for item in suggest_body:
             print item
             if not item == "_shards":
                 print suggest_body[item][0]
                 if len(suggest_body[item][0]["options"]) > 0:
-                    #corrected
-                    new_query = new_query.replace(suggest_body[item][0]["text"], suggest_body[item][0]["options"][0]["text"])
+                    corrected = suggest_body[item][0]["options"][0]["text"]
+                    new_query = new_query.replace(suggest_body[item][0]["text"], corrected)
+                    terms.append(corrected)
 
-        suggestions.append(new_query)
-        print suggestions
+        if len(terms) > 0:
+            suggestions.append(new_query)
+            for i in range(len(terms)):
+                coords[new_query.find(terms[i])] = str(len(terms[i]))
+            for item in sorted(coords, reverse=True):
+                suggestions.append(str(item) + "," + coords[item])
         return suggestions
 
     def sendQuery(self):
