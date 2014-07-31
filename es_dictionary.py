@@ -179,7 +179,7 @@ class ElasticSearchQuery:
 
         if len(terms) > 0:
             suggestions.append(new_query)
-            for i in range(len(terms)):
+            for i in range(0, len(terms)):
                 coords[new_query.find(terms[i])] = str(len(terms[i]))
             for item in sorted(coords, reverse=True):
                 suggestions.append(str(item) + "," + coords[item])
