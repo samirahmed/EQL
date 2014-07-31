@@ -173,7 +173,7 @@ def resolve_contact(prefix):
           "completion" : 
             {
               "field" : "contact_suggest",
-              "fuzzy": True
+              "fuzzy": False
             }
         }
     }, indent=2)
